@@ -1,77 +1,51 @@
-PROJECT = roll
+PROJECT = demo
 
+LIB = roll
 SRC = $(PROJECT).c
-HEADERS = $(PROJECT).h
+HEADERS = $(LIB).h
 
-SHARED_BIN = $(PROJECT)-shared
-SHARED_LIB = $(LIB_PATH)/libroll.so
-
-STATIC_BIN = $(PROJECT)-static
-STATIC_LIB = $(LIB_PATH)/libroll.a
+STATIC_LIB = $(LIB_PATH)/lib$(LIB).a
+SHARED_LIB = $(LIB_PATH)/lib$(LIB).so
 
 DYLIB_BIN = $(PROJECT)-dynamic
+SHARED_BIN = $(PROJECT)-shared
+STATIC_BIN = $(PROJECT)-static
 
-PRODUCTS = $(SHARED_BIN) $(STATIC_BIN)
-CFLAGS += -g -Wall -Wextra -Wconversion -pedantic -fno-builtin
-LDFLAGS = -L $(LIB_PATH) -l roll
+CFLAGS += -g -Wall -Werror -Wconversion -fno-builtin
 
-LIB_PATH = ./target/release
+# only used to link against shared lib
+LDFLAGS = -L $(LIB_PATH) -l $(LIB)
 
+PRODUCTS = $(DYLIB_BIN) $(SHARED_BIN) $(STATIC_BIN)
+LIB_PATH = ./target/debug
+
+# default args; override with `ARGS="2 6"`
 ARGS = 3 8
 
 #
-# primary targets
+# phony targets
 #
 
-.PHONY: all
-all: build
+.PHONY: all dynamic shared static run clean distclean
 
-.PHONY: build
-build: $(SHARED_LIB) $(DYLIB_BIN) $(SHARED_BIN) $(STATIC_BIN)
+all: build dynamic shared static
 
-.PHONY: cargo-release
-cargo-release:
-	cargo build --lib --release
+build: $(DYLIB_BIN) $(SHARED_BIN) $(STATIC_BIN)
 
-.PHONY: check
-check: check-static check-shared check-dynamic
-
-.PHONY: run
-run: run-static run-shared run-dynamic
-
-#
-# check
-#
-
-.PHONY: check-dynamic check-shared check-static
-
-check-dynamic: $(DYLIB_BIN)
-	LD_LIBRARY_PATH="$(LIB_PATH)" ldd $(DYLIB_BIN)
-
-check-shared: $(SHARED_BIN)
-	LD_LIBRARY_PATH="$(LIB_PATH)" ldd $(SHARED_BIN)
-
-check-static: $(STATIC_BIN)
-	ldd $(STATIC_BIN)
-
-#
-# run
-#
-
-.PHONY: run-dynamic run-shared run-static
-
-run-dynamic: $(DYLIB_BIN)
+dynamic: $(SHARED_LIB) $(DYLIB_BIN)
 	LD_LIBRARY_PATH="$(LIB_PATH)" ./$(DYLIB_BIN) $(ARGS)
 
-run-shared: $(SHARED_BIN)
+shared: $(SHARED_BIN)
 	LD_LIBRARY_PATH="$(LIB_PATH)" ./$(SHARED_BIN) $(ARGS)
 
-run-static: $(STATIC_BIN)
+static: $(STATIC_BIN)
 	./$(STATIC_BIN) $(ARGS)
 
-.PHONY: clean distclean
+run: static shared dynamic
+
 clean:
 	rm -rf $(PRODUCTS)
+
 distclean: clean
 	cargo clean
 
@@ -79,16 +53,18 @@ distclean: clean
 # real targets
 #
 
-$(SHARED_LIB): cargo-release
+$(SHARED_LIB):
+	cargo build --lib
 
-$(STATIC_LIB): cargo-release
+$(STATIC_LIB):
+	cargo build --lib
 
-$(DYLIB_BIN): $(SRC) $(HEADERS) $(SHARED_LIB)
-	$(CC) -DDYNAMIC_ROLL $(CFLAGS) $(SRC) -o $(DYLIB_BIN)
+$(DYLIB_BIN): $(HEADERS) $(SRC)
+	$(CC) $(CFLAGS) $(SRC) -o $(DYLIB_BIN) -DDYNAMIC_ROLL
 
-$(SHARED_BIN): $(SRC) $(HEADERS) $(SHARED_LIB)
+$(SHARED_BIN): $(HEADERS) $(SRC) $(SHARED_LIB)
 	$(CC) $(CFLAGS) $(SRC) -o $(SHARED_BIN) $(LDFLAGS)
 
-$(STATIC_BIN): $(SRC) $(HEADERS) $(STATIC_LIB)
+$(STATIC_BIN): $(HEADERS) $(SRC) $(STATIC_LIB)
 	$(CC) $(CFLAGS) $(SRC) -o $(STATIC_BIN) $(STATIC_LIB)
 
