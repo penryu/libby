@@ -20,6 +20,33 @@ This is a native Rust process, linking against a neighboring Rust lib project by
      Running `.../libby/target/release/rustroll 3 8`
 3d8 => 10
 ```
+# Rust calling `extern "C"` functions via `dlopen()`
+
+This demo uses the [`dlopen2`](https://github.com/OpenByteDev/dlopen2) crate to dynamically load the
+`libroll.so` library at runtime.
+
+Note that `roll` nicely avoids lifetime issues by dealing only with
+integer arguments and return values. If your interface passes pointers, you'll need to handle a
+little more `unsafe`, raw pointers, and lifetimes.
+
+Cargo projects:
+- [roll](./roll/src/lib.rs) - a toy library that provides a dice roll function: `roll`
+- [dyroll](./dyroll/src/main.rs) - a Rust front-end for `libroll`
+
+```sh
+% cargo build --lib              
+   Compiling rand v0.8.5
+   Compiling roll v0.1.0 (/home/penryu/code/libby/roll)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.11s
+
+% cargo run --bin dyroll -- 3 8
+   Compiling dlopen2 v0.7.0
+   Compiling clap v4.5.13
+   Compiling dyroll v0.1.0 (/home/penryu/code/libby/dyroll)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.69s
+     Running `target/debug/dyroll 3 8`
+3d8 => 7
+```
 
 # C calling Rust
 
@@ -38,7 +65,7 @@ C source:
 library is installed on the system, this won't be necessary.
 
 
-## *static* - C statically linked against Rust library
+## `static` - C statically linked against Rust library
 
 Builds the demo with `demo` binary statically linked against `libroll.a`. Note that we direct the
 compiler directly to the library.
@@ -58,7 +85,7 @@ cc -g -Wall -Wconversion -fno-builtin demo.c -o demo-static ./target/debug/libro
 3d8 => 23
 ```
 
-## *shared* - C linked against shared Rust library
+## `shared` - C linked against shared Rust library
 
 Builds the demo with `demo` binary dynamically linked against `libroll.so`, and automatically
 loading the library at launch time.
@@ -80,7 +107,7 @@ LD_LIBRARY_PATH="./target/debug" ./demo-shared 3 8
 3d8 => 16
 ```
 
-## *dylib* - C dynamically linked against shared Rust library at runtime
+## `dlopen` - C dynamically linked against shared Rust library at runtime
 
 Uses `dlopen(3)` to load the shared library `libroll.so` at runtime. The linker knows nothing about
 the library at compile time _or_ at launch time. Look at `demo.c` to see how we lookup `libroll.so`
