@@ -48,6 +48,9 @@ Cargo projects:
 3d8 => 7
 ```
 
+*NB* `LD_LIBRARY_PATH` is set so `dlopen` can find the local build of the library at runtime. If the
+library is installed on the system, this won't be necessary.
+
 # C calling Rust
 
 The following examples all come from the same source:
@@ -60,9 +63,6 @@ C source:
 - [demo.c](./demo.c) - C front-end to demo the `roll()` function
 
 *NB* `#ifdef` is used in `demo.c` to build the `dlopen()` code only for the dynamic demo.
-
-*NB* `LD_LIBRARY_PATH` is set so `dlopen` can find the local build of the library at runtime. If the
-library is installed on the system, this won't be necessary.
 
 
 ## `static` - C statically linked against Rust library
@@ -127,3 +127,7 @@ cc -g -Wall -Werror -Wconversion -fno-builtin demo.c -o demo-dynamic -DDYNAMIC_R
 LD_LIBRARY_PATH="./target/debug" ./demo-dynamic 3 8
 3d8 => 15
 ```
+
+*NB* `LD_LIBRARY_PATH` is set so `dlopen` can find the local build of the library at runtime. If the
+library is installed on the system, this won't be necessary.
+
