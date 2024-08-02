@@ -1,0 +1,6 @@
+[workspace]
+members = [ "dyroll",
+  "roll",
+  "rustroll",
+]
+resolver = "2"
