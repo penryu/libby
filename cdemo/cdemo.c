@@ -2,15 +2,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define EXIT_USAGE 1
-#define EXIT_RUNTIME 2
+#if defined(DYNAMIC_ROLL)
 
-#ifdef DYNAMIC_ROLL
+// setup for dlopen
 #include <dlfcn.h>
 typedef uint16_t (*roll_t)(uint8_t, uint8_t);
+
+#if defined(__APPLE__)
+#define LIB_FILE "libroll.dylib"
 #else
-#include "roll.h"
+#define LIB_FILE "libroll.so"
 #endif
+
+#else
+
+// just include header; linker handles the rest
+#include "roll.h"
+
+#endif
+
+const int EXIT_USAGE = 1;
+const int EXIT_RUNTIME = 2;
 
 int main(int argc, const char **argv) {
 
@@ -34,7 +46,7 @@ int main(int argc, const char **argv) {
 #ifdef DYNAMIC_ROLL
   dlerror(); // clear errors
 
-  void *dlhandle = dlopen("libroll.so", RTLD_LAZY);
+  void *dlhandle = dlopen("../target/debug/libroll.so", RTLD_LAZY);
   if (!dlhandle) {
     fprintf(stderr, "Error: dlopen() failed\n");
     return EXIT_RUNTIME;
