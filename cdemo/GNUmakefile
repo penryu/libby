@@ -29,7 +29,8 @@ DYLIB_BIN := $(PROJECT)-dynamic
 SHARED_BIN := $(PROJECT)-shared
 STATIC_BIN := $(PROJECT)-static
 
-PRODUCTS := $(DYLIB_BIN) $(SHARED_BIN) $(STATIC_BIN)
+BINS := $(DYLIB_BIN) $(SHARED_BIN) $(STATIC_BIN)
+PRODUCTS := $(BINS) *.dSYM
 
 # Try to keep our C safe.
 CFLAGS += -g -O0 -Wall -Werror -Wconversion -fno-builtin
@@ -46,7 +47,7 @@ LD_RPATH := -Wl,-rpath,$(LIB_PATH)
 
 all: check
 
-build: $(PRODUCTS)
+build: $(BINS)
 
 check: build dynamic shared static
 
