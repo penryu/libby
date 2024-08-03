@@ -9,9 +9,9 @@
 typedef uint16_t (*roll_t)(uint8_t, uint8_t);
 
 #if defined(__APPLE__)
-#define LIB_FILE "libroll.dylib"
+#define LIBROLL "../target/debug/libroll.dylib"
 #else
-#define LIB_FILE "libroll.so"
+#define LIBROLL "../target/debug/libroll.so"
 #endif
 
 #else
@@ -46,7 +46,7 @@ int main(int argc, const char **argv) {
 #ifdef DYNAMIC_ROLL
   dlerror(); // clear errors
 
-  void *dlhandle = dlopen("../target/debug/libroll.so", RTLD_LAZY);
+  void *dlhandle = dlopen(LIBROLL, RTLD_LAZY);
   if (!dlhandle) {
     fprintf(stderr, "Error: dlopen() failed\n");
     return EXIT_RUNTIME;

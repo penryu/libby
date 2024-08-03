@@ -5,13 +5,15 @@ ARGS ?= 3 8
 
 # system-specific setup
 SYSNAME := $(shell uname -s)
+
 ifeq ($(SYSNAME),FreeBSD)
 	LDFLAGS += -l pthread
 endif
 
-SHARED_LIB_EXT = so
 ifeq ($(SYSNAME),Darwin)
 	SHARED_LIB_EXT = dylib
+else
+	SHARED_LIB_EXT = so
 endif
 
 SRC := $(PROJECT).c
@@ -34,8 +36,7 @@ CFLAGS += -g -O0 -Wall -Werror -Wconversion -fno-builtin
 
 # This hardcodes the path to libroll into the binary.
 # This way we can run it directly without installing the library or setting LD_LIBRARY_PATH.
-#LD_RPATH := -Wl,-rpath="$(PWD)/$(LIB_PATH)"
-LD_RPATH := -Wl,-rpath="$(LIB_PATH)"
+LD_RPATH := -Wl,-rpath,$(LIB_PATH)
 
 #
 # phony targets
