@@ -54,7 +54,7 @@ The shared implementation involves more use of `unsafe` blocks, as well as the u
 types, where the dynamic implementation uses far less `unsafe`, and allows the use of Rust-style
 syntax for managing calls to the underlying library functions.
 
-However, look at lines 51-60 in the [dynamic](./src/mp_int/gmp_dynamic.md) source. The use of Rust
+However, look at lines 51-60 in the [dynamic](./src/mp_int/gmp_dynamic.rs) source. The use of Rust
 syntax requires compliance with the Rust borrow checker, preventing the passing of the same `mpz*`
 variable as 2 arguments to the same function, a call that works perfectly well by design in lines
 45-46 of [shared](./src/mp_int/gmp_shared.md).
