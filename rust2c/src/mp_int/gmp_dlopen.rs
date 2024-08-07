@@ -11,7 +11,7 @@ use libc::{c_char, c_int, c_ulong, c_void, size_t};
 struct GmpApi {
     // HACK: This is just a C string with type `const char * const`, but I wasn't able to
     // convince the compiler to let me use pointers, since they aren't Sync-safe.
-    __gmp_version: &'static &'static u8,
+    __gmp_version: &'static &'static c_char,
     __gmpz_clear: fn(n: &mut MpInt),
     __gmpz_cmp_ui: fn(a: *const MpInt, b: c_ulong) -> c_int,
     __gmpz_get_str: fn(s: *mut c_char, base: c_int, src: *const MpInt) -> *mut c_char,
