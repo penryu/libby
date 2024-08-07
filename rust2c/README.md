@@ -1,7 +1,7 @@
 # rust2c
 
 Cargo projects:
-- [rust2c](./src/lib.rs) - a Rust cargo project that demonstrates two methods to link against an
+- [rust2c](./src/main.rs) - a Rust cargo project that demonstrates two methods to link against an
     `extern "C"` library
 
 This demo uses the [`dlopen2`](https://github.com/OpenByteDev/dlopen2) crate to dynamically load the
