@@ -50,20 +50,11 @@ code:
 - [shared](./src/mp_int/gmp_shared.md)
 - [dynamic](./src/mp_int/gmp_dynamic.md)
 
-The shared implementation involves more use of `unsafe` blocks, as well as the use of raw pointer
-types, where the dynamic implementation uses far less `unsafe`, and allows the use of Rust-style
-syntax for managing calls to the underlying library functions.
+The shared implementation involves more use of `unsafe` blocks, 
+where the dynamic implementation uses far less `unsafe`, and allows the use of Rust-style
+syntax for managing calls to the underlying library functions. However, the in order to pass the sam
+`mpz*` as both result and operand arguments (as the library does), we use pointers here.
 
-However, look at lines 51-60 in the [dynamic](./src/mp_int/gmp_dynamic.rs) source. The use of Rust
-syntax requires compliance with the Rust borrow checker, preventing the passing of the same `mpz*`
-variable as 2 arguments to the same function, a call that works perfectly well by design in lines
-45-46 of [shared](./src/mp_int/gmp_shared.md).
-
-This is half of my preference of the shared method: you are still permitted (within the `unsafe`
-blocks we knew we would be dealing with) to use C/C++ logic to interface with the underlying C/C++
-library functions.
-
-The other half of my preference for standard shared library linking is that you get the validation
-of library linkage at both compile time and launch time.
-
-Compared to the dlopen method, which leaves all library validation to late in the program execution.
+My preference for standard shared library linking is that you get the validation of library linkage
+at both compile time and launch time. Compared to the dlopen method, which leaves all library
+validation to late in the program execution.

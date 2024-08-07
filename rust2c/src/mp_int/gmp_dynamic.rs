@@ -13,16 +13,16 @@ struct GmpApi {
     // convince the compiler to let me use pointers, since they aren't Sync-safe.
     __gmp_version: &'static &'static u8,
     __gmpz_clear: fn(n: &mut MpInt),
-    __gmpz_cmp_ui: fn(a: &MpInt, b: c_ulong) -> c_int,
-    __gmpz_get_str: fn(s: *mut c_char, base: c_int, src: &MpInt) -> *mut c_char,
-    __gmpz_init: fn(dst: &mut MpInt),
-    __gmpz_init_set: fn(dst: &mut MpInt, src: &MpInt),
-    __gmpz_init_set_ui: fn(dst: &mut MpInt, src: c_ulong),
-    __gmpz_mul: fn(dst: &mut MpInt, fact1: &MpInt, fact2: &MpInt),
-    __gmpz_set: fn(dst: &mut MpInt, src: &MpInt),
-    __gmpz_sizeinbase: fn(src: &MpInt, base: c_int) -> size_t,
-    __gmpz_sub_ui: fn(diff: &mut MpInt, min: &MpInt, sub: c_ulong),
-    __gmpz_swap: fn(a: &mut MpInt, b: &mut MpInt),
+    __gmpz_cmp_ui: fn(a: *const MpInt, b: c_ulong) -> c_int,
+    __gmpz_get_str: fn(s: *mut c_char, base: c_int, src: *const MpInt) -> *mut c_char,
+    __gmpz_init: fn(dst: *mut MpInt),
+    __gmpz_init_set: fn(dst: *mut MpInt, src: *const MpInt),
+    __gmpz_init_set_ui: fn(dst: *mut MpInt, src: c_ulong),
+    __gmpz_mul: fn(dst: *mut MpInt, fact1: *const MpInt, fact2: &MpInt),
+    __gmpz_set: fn(dst: *mut MpInt, src: *const MpInt),
+    __gmpz_sizeinbase: fn(src: *const MpInt, base: c_int) -> size_t,
+    __gmpz_sub_ui: fn(diff: *mut MpInt, min: *const MpInt, sub: c_ulong),
+    __gmpz_swap: fn(a: *mut MpInt, b: *mut MpInt),
 }
 
 lazy_static::lazy_static! {
@@ -48,15 +48,9 @@ impl MpInt {
             return result;
         }
 
-        // HACK: `dlopen2` lets us use Rust syntax and semantics... but the borrow checker
-        // directly interferes with gmp's intended use case here. To work around this,
-        // we assign the result to a temporary mpz, then swap them back.
-        let mut tmp = MpInt::from(0);
         while GMP.__gmpz_cmp_ui(&n, 1) > 0 {
-            GMP.__gmpz_mul(&mut tmp, &result, &n);
-            GMP.__gmpz_swap(&mut result, &mut tmp);
-            GMP.__gmpz_sub_ui(&mut tmp, &n, 1);
-            GMP.__gmpz_swap(&mut n, &mut tmp);
+            GMP.__gmpz_mul(&mut result, &result, &n);
+            GMP.__gmpz_sub_ui(&mut n, &n, 1);
         }
 
         result
