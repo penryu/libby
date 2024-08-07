@@ -12,5 +12,5 @@ libc = "0.2"
 
 [features]
 default = []
-dynamic = ["dep:dlopen2", "dep:lazy_static"]
 shared = []
+dlopen = ["dep:dlopen2", "dep:lazy_static"]

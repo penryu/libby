@@ -5,7 +5,7 @@
 #if defined(DYLIB_PATH)
 
 /*
- * dynamic (dlopen) build
+ * dlopen (runtime-linked) build
  */
 
 // include library for dynamically loading libraries at runtime

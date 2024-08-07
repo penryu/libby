@@ -30,10 +30,10 @@ rust2c 0.2.0 using gmp 6.2.1
 50! -> 30414093201713378043612608166064768844377641568960512000000000000
 ```
 
-For the dynamic (`dlopen`) implementation, use:
+For the `dlopen` implementation, use:
 
 ```sh
-$ cargo run --features dynamic 50
+$ cargo run --features dlopen 50
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s
      Running `target/debug/rust2c 50`
 rust2c 0.2.0 using gmp 6.2.1
@@ -48,10 +48,10 @@ Now that you've seen both implementations work and (hopefully) yield the same re
 code:
 
 - [shared](./src/mp_int/gmp_shared.md)
-- [dynamic](./src/mp_int/gmp_dynamic.md)
+- [dlopen](./src/mp_int/gmp_dlopen.md)
 
 The shared implementation involves more use of `unsafe` blocks, 
-where the dynamic implementation uses far less `unsafe`, and allows the use of Rust-style
+where the dlopen implementation uses far less `unsafe`, and allows the use of Rust-style
 syntax for managing calls to the underlying library functions. However, the in order to pass the sam
 `mpz*` as both result and operand arguments (as the library does), we use pointers here.
 

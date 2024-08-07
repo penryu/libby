@@ -31,11 +31,11 @@ LIB_PATH := $(PWD)/target/debug
 STATIC_LIB := $(LIB_PATH)/$(LIB_FILE).a
 SHARED_LIB := $(LIB_PATH)/$(LIB_FILE).$(SHARED_LIB_EXT)
 
-DYNAMIC_BIN := $(PROJECT)-dynamic
+DLOPEN_BIN := $(PROJECT)-dlopen
 SHARED_BIN := $(PROJECT)-shared
 STATIC_BIN := $(PROJECT)-static
 
-BINS := $(STATIC_BIN) $(SHARED_BIN) $(DYNAMIC_BIN)
+BINS := $(STATIC_BIN) $(SHARED_BIN) $(DLOPEN_BIN)
 PRODUCTS := $(BINS) *.dSYM
 
 # Try to keep our C safe.
@@ -49,13 +49,13 @@ LD_RPATH := -Wl,-rpath,$(LIB_PATH)
 # phony targets
 #
 
-.PHONY: all build check clean distclean dynamic shared static
+.PHONY: all build check clean distclean dlopen shared static
 
 all: check
 
 build: $(BINS)
 
-check: build static shared dynamic
+check: build static shared dlopen
 
 static: $(STATIC_BIN)
 	./$(STATIC_BIN) $(ARGS)
@@ -63,8 +63,8 @@ static: $(STATIC_BIN)
 shared: $(SHARED_BIN) $(SHARED_LIB)
 	./$(SHARED_BIN) $(ARGS)
 
-dynamic: $(DYNAMIC_BIN) $(SHARED_LIB)
-	./$(DYNAMIC_BIN) $(ARGS)
+dlopen: $(DLOPEN_BIN) $(SHARED_LIB)
+	./$(DLOPEN_BIN) $(ARGS)
 
 clean:
 	rm -rf $(PRODUCTS)
@@ -111,7 +111,7 @@ $(SHARED_BIN): $(SRC) $(SHARED_LIB)
 	  $(CC) $(CFLAGS) $(SRC) -o $(SHARED_BIN) $(LDFLAGS) $(LD_RPATH) -l $(LIB)
 
 #
-# dynamic
+# dlopen
 #
 # The most fragile method so far.
 #
@@ -125,5 +125,5 @@ $(SHARED_BIN): $(SRC) $(SHARED_LIB)
 # `DYLIB_PATH` is used to hardcode the path to the library inside the program. During the
 # compilation, this value is also used to signal whether to include the `dlopen()` logic.
 #
-$(DYNAMIC_BIN): $(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o $(DYNAMIC_BIN) $(LDFLAGS) -DDYLIB_PATH="$(SHARED_LIB)"
+$(DLOPEN_BIN): $(SRC)
+	$(CC) $(CFLAGS) $(SRC) -o $(DLOPEN_BIN) $(LDFLAGS) -DDYLIB_PATH="$(SHARED_LIB)"

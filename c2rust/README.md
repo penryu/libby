@@ -22,7 +22,7 @@ install GNU `make` and use `gmake` in the examples below.
 
 ```sh
 c2rust $ make clean all
-rm -rf c2rust-static c2rust-shared c2rust-dynamic *.dSYM
+rm -rf c2rust-static c2rust-shared c2rust-dlopen *.dSYM
 
 cargo clean
     ... ...
@@ -41,13 +41,13 @@ LIBRARY_PATH="/.../libby/c2rust/target/debug" \
 LIBRARY_PATH="/.../libby/c2rust/target/debug" \
   cc -g -O0 -Wall -Werror -Wconversion -fno-builtin c2rust.c -o c2rust-shared  -Wl,-rpath,.../libby/c2rust/target/debug -l roll
 
-cc -g -O0 -Wall -Werror -Wconversion -fno-builtin c2rust.c -o c2rust-dynamic  -DDYLIB_PATH="/.../libby/c2rust/target/debug/libroll.so"
+cc -g -O0 -Wall -Werror -Wconversion -fno-builtin c2rust.c -o c2rust-dlopen  -DDYLIB_PATH="/.../libby/c2rust/target/debug/libroll.so"
 
 ./c2rust-static 3 8
 3d8 => 17
 ./c2rust-shared 3 8
 3d8 => 16
-./c2rust-dynamic 3 8
+./c2rust-dlopen 3 8
 3d8 => 14
 ```
 
@@ -55,7 +55,7 @@ These are the high level stages in the above session. We'll go into more detail 
 
 1. Clean up the previous build.
 2. Build `libroll`
-3. Build the binaries: `c2rust-dynamic`, `c2rust-shared`, `c2rust-static`
+3. Build the binaries: `c2rust-dlopen`, `c2rust-shared`, `c2rust-static`
 4. Run the binaries
 
 ## A Closer Look
@@ -98,7 +98,7 @@ Some useful utilities to inspect the differences between these binaries:
 ```sh
 # on Linux / FreeBSD
 $ ldd c2rust-*
-c2rust-dynamic:
+c2rust-dlopen:
     linux-vdso.so.1 (0x0000ffff05e9c000)
     libc.so.6 => /lib64/libc.so.6 (0x0000ffff05c50000)
     /lib/ld-linux-aarch64.so.1 (0x0000ffff05e54000)
@@ -115,13 +115,13 @@ c2rust-static:
     /lib/ld-linux-aarch64.so.1 (0x0000ffff84378000)
 
 # on macOS, this is roughly equivalent
-$ otool -L c2rust-{static,shared,dynamic}
+$ otool -L c2rust-{static,shared,dlopen}
 c2rust-static:
     /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1345.100.2)
 c2rust-shared:
     /.../libby/c2rust/target/debug/deps/libroll.dylib (compatibility version 0.0.0, current version 0.0.0)
     /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1345.100.2)
-c2rust-dynamic:
+c2rust-dlopen:
     /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1345.100.2)
 
 ```
@@ -178,10 +178,10 @@ $ ./c2rust-shared 2 6
 ```
 
 
-### `c2rust-dynamic`
+### `c2rust-dlopen`
 
 ```sh
-$ ldd c2rust-dynamic
+$ ldd c2rust-dlopen
     linux-vdso.so.1 (0x0000ffff6f0c8000)
     libc.so.6 => /lib64/libc.so.6 (0x0000ffff6ee80000)
     /lib/ld-linux-aarch64.so.1 (0x0000ffff6f080000)
@@ -194,13 +194,13 @@ This is because `libgcc_s.so` is a dependency of `libroll.so`, and is only a _tr
 of `c2demo`. But in the case of `c2demo-static` and `c2rust-shared`, the linker knows that it *WILL*
 need `libgcc_s.so`, so goes ahead and adds it to the ELF data.
 
-In the dynamic method, the linker doesn't know anything about `libroll.so` until we call `dlopen()`.
+In the dlopen method, the linker doesn't know anything about `libroll.so` until we call `dlopen()`.
 Only *then* does it find the `libgcc_s.so` dependency, find it, and load it.
 
 > "But wait, you said `ldd` lists the libraries the binary depends on!"
 
 True. However, `ldd` only examines the libraries listed in the header, and invokes the system linker
-to try to resolve them. In order to discover `c2demo-dynamic`'s dependency on `libroll.so`, `ldd` it
+to try to resolve them. In order to discover `c2demo-dlopen`'s dependency on `libroll.so`, `ldd` it
 would need to _run_ it.[*]
 
 [*] In some cases, `ldd` _might_ run the binary. This can be a security concern. Don't run `ldd(1)`

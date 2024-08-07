@@ -12,7 +12,7 @@
 //!
 //! 10! -> 3628800
 //!
-//! $ cargo run -F dynamic 10
+//! $ cargo run -F dlopen 10
 //!     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s
 //!      Running `target/debug/rust2c 10`
 //! rust2c 0.2.0 using gmp 6.2.1
@@ -21,16 +21,16 @@
 //! ```
 
 cfg_if::cfg_if! {
-    if #[cfg(all(feature = "dynamic", feature = "shared"))] {
-        compile_error!("features `dynamic` and `shared` are mutually exclusive");
-    } else if #[cfg(feature = "dynamic")] {
-        #[path = "gmp_dynamic.rs"]
-        mod gmp;
+    if #[cfg(all(feature = "shared", feature = "dlopen"))] {
+        compile_error!("features `shared` and `dlopen` are mutually exclusive");
     } else if #[cfg(feature = "shared")] {
         #[path = "gmp_shared.rs"]
         mod gmp;
+    } else if #[cfg(feature = "dlopen")] {
+        #[path = "gmp_dlopen.rs"]
+        mod gmp;
     } else {
-        compile_error!("Please select the `dynamic` or `shared` feature\neg: cargo run -F shared");
+        compile_error!("Please select the `shared` or `dlopen` feature\neg: cargo run -F shared");
     }
 }
 
