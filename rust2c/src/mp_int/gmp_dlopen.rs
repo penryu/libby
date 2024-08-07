@@ -75,7 +75,7 @@ impl fmt::Display for MpInt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let buf_size = GMP.__gmpz_sizeinbase(self, 10);
         let mut buf = vec![0u8; buf_size + 2];
-        GMP.__gmpz_get_str(buf.as_mut_ptr(), 10, self);
+        GMP.__gmpz_get_str(buf.as_mut_ptr().cast::<c_char>(), 10, self);
         write!(f, "{}", String::from_utf8(buf).expect("encoding error"))
     }
 }
