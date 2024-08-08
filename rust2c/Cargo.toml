@@ -3,9 +3,19 @@ name = "rust2c"
 version = "0.2.0"
 edition = "2021"
 
+[[bin]]
+name = "rust2c-shared"
+path = "src/main.rs"
+required-features = ["shared"]
+
+[[bin]]
+name = "rust2c-dlopen"
+path = "src/main.rs"
+required-features = ["dlopen"]
+
 [dependencies]
+anyhow = "1.0.86"
 cfg-if = "1.0"
-clap = { version = "4.5", features = ["cargo", "derive"] }
 dlopen2 = { version = "0.7", optional = true }
 lazy_static = { version = "1.5", optional = true }
 libc = "0.2"
