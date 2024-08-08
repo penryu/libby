@@ -93,7 +93,7 @@ impl fmt::Display for MpInt {
         let buf_size = GMP.__gmpz_sizeinbase(self, 10);
         let mut buf = vec![0u8; buf_size + 2];
         GMP.__gmpz_get_str(buf.as_mut_ptr().cast::<c_char>(), 10, self);
-        let cstr = unsafe { CStr::from_ptr(buf.as_ptr()) };
+        let cstr = unsafe { CStr::from_ptr(buf.as_ptr().cast::<c_char>()) };
         write!(f, "{}", cstr.to_str().expect("encoding error"))
     }
 }
