@@ -1,6 +1,6 @@
-# A heavily commented Makefile.
+# A commented Makefile.
 #
-# I've tried to make the logic fairly straightforward,
+# I've tried to keep the logic fairly straightforward,
 # and tried to add comments whenever it isn't.
 
 PROJECT = rust2c
